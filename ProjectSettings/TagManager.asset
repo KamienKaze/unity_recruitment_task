@@ -41,3 +41,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Floor
+    uniqueID: 1065397103
+    locked: 0
+  - name: Player
+    uniqueID: 4122675365
+    locked: 0
+  - name: New Layer 3
+    uniqueID: 2783599869
+    locked: 0
+  - name: New Layer 4
+    uniqueID: 3096587845
+    locked: 0
+  - name: UserInterface
+    uniqueID: 1869188637
+    locked: 0

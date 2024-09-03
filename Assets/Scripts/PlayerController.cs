@@ -1,88 +1,222 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using Vector2 = UnityEngine.Vector2;
 
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D playerRigidbody;
+    private float currentVelocity;
 
+    // UI Objects
+    #region
     [SerializeField]
-    private Transform shootingPoint;
-
-    [SerializeField]
-    private GameObject bulletPrefab;
+    private TMP_Text velocityMeter;
+    #endregion
 
     // Input Variables
     #region
-    private float horizontal;
-    private float vertical;
-    private Vector3 mousePosition;
+    private Vector2 mousePositionRelativeToPlayer;
+    private Vector2 moveInput;
+    private Action chargeButtonClicked;
+    private Action dashStart;
+    private Action dashEnd;
+    #endregion
+
+    // Movement Settings
+    #region
+    [SerializeField]
+    private float maxVelocity;
+
+    [SerializeField]
+    private float runSpeed;
+
+    [SerializeField]
+    private float chargeSpeed;
+
+    [SerializeField]
+    private float chargeRange;
+
+    [SerializeField]
+    private float dashVelocityDecreaseSpeed;
+    #endregion
+
+    // Charge Vectors
+    #region
+    private Vector2 chargeDestination = Vector2.zero;
+    private Vector2 chargeDirection = Vector2.zero;
+    private Vector2 chargeStartingVelocity = Vector2.zero;
     #endregion
 
     [SerializeField]
-    private float playerHealth = 5.0f;
+    private bool isCharging = false;
 
     [SerializeField]
-    private float runSpeedMultiplier = 5.0f;
-
-    [SerializeField]
-    private float scaleMultiplier = 0.5f;
+    private bool isDashing = false;
 
     void Start()
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
+
+        // Assign Observers
+        #region
+        chargeButtonClicked += ChargeStarted;
+        dashStart += DashStarted;
+        dashEnd += DashEnded;
+        #endregion
     }
 
     void Update()
     {
-        GatherInput();
+        GetMousePosition();
+        GetMoveInput();
+
         RotatePlayer();
 
-        DebugHealth();
+        UpdateUserInterface();
+        DrawDebugLines();
     }
 
     private void FixedUpdate()
     {
+        currentVelocity = playerRigidbody.velocity.magnitude;
         MovePlayer();
+        HandleDash();
+        HandleCharge();
     }
 
-    private void GatherInput()
+    private void UpdateUserInterface()
     {
-        horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Input.GetAxisRaw("Vertical");
+        velocityMeter.text = "Velocity: " + Mathf.Round(currentVelocity * 100f) / 100f;
+    }
 
-        mousePosition = Input.mousePosition;
+    private void GetMousePosition()
+    {
+        mousePositionRelativeToPlayer = Input.mousePosition;
+
+        mousePositionRelativeToPlayer = Camera.main.ScreenToWorldPoint(
+            mousePositionRelativeToPlayer
+        );
+
+        mousePositionRelativeToPlayer = new Vector2(
+            mousePositionRelativeToPlayer.x - transform.position.x,
+            mousePositionRelativeToPlayer.y - transform.position.y
+        );
     }
 
     private void RotatePlayer()
     {
-        mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        transform.up = mousePositionRelativeToPlayer;
+    }
 
-        Vector2 direction = new Vector2(
-            mousePosition.x - transform.position.x,
-            mousePosition.y - transform.position.y
-        );
+    private void GetMoveInput()
+    {
+        moveInput.x = Input.GetAxisRaw("Horizontal");
+        moveInput.y = Input.GetAxisRaw("Vertical");
 
-        transform.up = direction;
+        if (Input.GetButtonDown("Fire2"))
+        {
+            chargeButtonClicked.Invoke();
+        }
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            dashStart.Invoke();
+        }
+
+        if (Input.GetButtonUp("Jump"))
+        {
+            dashEnd.Invoke();
+        }
+
+        moveInput.Normalize();
     }
 
     private void MovePlayer()
     {
-        playerRigidbody.velocity =
-            new Vector2(horizontal, vertical).normalized * runSpeedMultiplier;
+        if (isCharging || isDashing)
+        {
+            return;
+        }
+
+        playerRigidbody.velocity = moveInput * runSpeed;
+        //Debug.Log(moveInput * runSpeed);
     }
 
-    private void HandleHealthChanges() { }
-
-    public void DebugHealth()
+    private void HandleCharge()
     {
-        if (Input.GetKeyDown("+"))
+        if (!isCharging)
         {
-            Debug.Log("+");
+            return;
         }
-        if (Input.GetKeyDown("-"))
+
+        if (Vector2.Distance(transform.position, chargeDestination) < 0.3)
         {
-            Debug.Log("-");
+            ChargeEnded();
+        }
+
+        playerRigidbody.velocity = chargeStartingVelocity + (chargeDirection * chargeSpeed);
+    }
+
+    private void ChargeStarted()
+    {
+        if (isCharging)
+        {
+            return;
+        }
+
+        chargeStartingVelocity = playerRigidbody.velocity;
+        chargeDirection = mousePositionRelativeToPlayer.normalized;
+        chargeDestination =
+            (chargeDirection * chargeRange)
+            + new Vector2(transform.position.x, transform.position.y);
+        isCharging = true;
+        isDashing = false;
+    }
+
+    private void ChargeEnded()
+    {
+        chargeDestination = Vector2.zero;
+        chargeDirection = Vector2.zero;
+        isCharging = false;
+    }
+
+    private void DashStarted()
+    {
+        isDashing = true;
+        ChargeEnded();
+    }
+
+    private void DashEnded()
+    {
+        playerRigidbody.velocity = Vector2.zero;
+        isDashing = false;
+    }
+
+    private void HandleDash()
+    {
+        if (!isDashing)
+        {
+            return;
+        }
+
+        playerRigidbody.velocity = new Vector2(
+            Mathf.Lerp(playerRigidbody.velocity.x, 0, Time.deltaTime * dashVelocityDecreaseSpeed),
+            Mathf.Lerp(playerRigidbody.velocity.y, 0, Time.deltaTime * dashVelocityDecreaseSpeed)
+        );
+
+        if (currentVelocity < 1)
+        {
+            DashEnded();
+        }
+    }
+
+    private void DrawDebugLines()
+    {
+        if (chargeDestination != Vector2.zero)
+        {
+            Debug.DrawLine(transform.position, chargeDestination, Color.red);
         }
     }
 }
