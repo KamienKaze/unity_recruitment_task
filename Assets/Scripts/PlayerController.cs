@@ -26,20 +26,28 @@ public class PlayerController : MonoBehaviour
 
     // Movement Settings
     #region
-    [SerializeField]
-    private float maxVelocity;
+    private float maxVelocity = 20f;
 
     [SerializeField]
-    private float runSpeed;
+    private float runSpeed = 5f;
 
     [SerializeField]
-    private float chargeSpeed;
+    private float chargeSpeed = 4f;
 
     [SerializeField]
-    private float chargeRange;
+    private float chargeRange = 5f;
 
     [SerializeField]
-    private float dashVelocityDecreaseSpeed;
+    private float chargeThreshold = 0.3f;
+
+    [SerializeField]
+    private float chargeRangeMultiplier = 1f;
+
+    [SerializeField]
+    private float dashVelocityDecreaseSpeed = 1f;
+
+    [SerializeField]
+    private float dashEndVelocity = 0.5f;
     #endregion
 
     // Charge Vectors
@@ -151,7 +159,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (Vector2.Distance(transform.position, chargeDestination) < 0.3)
+        if (Vector2.Distance(transform.position, chargeDestination) < chargeThreshold)
         {
             ChargeEnded();
         }
@@ -166,11 +174,14 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        chargeStartingVelocity = playerRigidbody.velocity;
+        chargeStartingVelocity =
+            mousePositionRelativeToPlayer.normalized * playerRigidbody.velocity.magnitude;
         chargeDirection = mousePositionRelativeToPlayer.normalized;
         chargeDestination =
-            (chargeDirection * chargeRange)
-            + new Vector2(transform.position.x, transform.position.y);
+            (
+                chargeDirection
+                * (chargeRange + (playerRigidbody.velocity.magnitude * chargeRangeMultiplier))
+            ) + new Vector2(transform.position.x, transform.position.y);
         isCharging = true;
         isDashing = false;
     }
@@ -206,7 +217,7 @@ public class PlayerController : MonoBehaviour
             Mathf.Lerp(playerRigidbody.velocity.y, 0, Time.deltaTime * dashVelocityDecreaseSpeed)
         );
 
-        if (currentVelocity < 1)
+        if (currentVelocity < dashEndVelocity)
         {
             DashEnded();
         }
