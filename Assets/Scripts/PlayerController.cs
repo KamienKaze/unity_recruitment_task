@@ -9,10 +9,16 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D playerRigidbody;
     private float currentVelocity;
 
+    [SerializeField]
+    private bool colorIndicators = false;
+
     // UI Objects
     #region
     [SerializeField]
     private TMP_Text velocityMeter;
+
+    [SerializeField]
+    private SpriteRenderer spriteRenderer;
     #endregion
 
     // Input Variables
@@ -73,6 +79,11 @@ public class PlayerController : MonoBehaviour
         dashStart += DashStarted;
         dashEnd += DashEnded;
         #endregion
+
+        if (colorIndicators)
+        {
+            spriteRenderer.color = Color.blue;
+        }
     }
 
     void Update()
@@ -184,6 +195,10 @@ public class PlayerController : MonoBehaviour
             ) + new Vector2(transform.position.x, transform.position.y);
         isCharging = true;
         isDashing = false;
+        if (colorIndicators)
+        {
+            spriteRenderer.color = Color.red;
+        }
     }
 
     private void ChargeEnded()
@@ -191,18 +206,30 @@ public class PlayerController : MonoBehaviour
         chargeDestination = Vector2.zero;
         chargeDirection = Vector2.zero;
         isCharging = false;
+        if (colorIndicators)
+        {
+            spriteRenderer.color = Color.blue;
+        }
     }
 
     private void DashStarted()
     {
         isDashing = true;
         ChargeEnded();
+        if (colorIndicators)
+        {
+            spriteRenderer.color = Color.green;
+        }
     }
 
     private void DashEnded()
     {
         playerRigidbody.velocity = Vector2.zero;
         isDashing = false;
+        if (colorIndicators)
+        {
+            spriteRenderer.color = Color.blue;
+        }
     }
 
     private void HandleDash()
