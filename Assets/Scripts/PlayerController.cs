@@ -7,83 +7,91 @@ using Vector2 = UnityEngine.Vector2;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D playerRigidbody;
-    private float currentVelocity;
 
     [SerializeField]
-    private bool colorIndicators = false;
+    private GameObject bulletPrefab;
+    private float currentVelocity;
 
     // UI Objects
     #region
-    [SerializeField]
     private TMP_Text velocityMeter;
-
-    [SerializeField]
-    private SpriteRenderer spriteRenderer;
     #endregion
 
     // Input Variables
     #region
     private Vector2 mousePositionRelativeToPlayer;
     private Vector2 moveInput;
-    private Action chargeButtonClicked;
-    private Action dashStart;
-    private Action dashEnd;
+    private Action dashButtonClicked;
+    private Action slideStart;
+    private Action slideEnd;
     #endregion
 
     // Movement Settings
     #region
-    private float maxVelocity = 20f;
+    //private float maxVelocity = 20f;
 
+    [Header("Run Settings")]
     [SerializeField]
     private float runSpeed = 5f;
 
+    [Header("Dash Settings")]
     [SerializeField]
-    private float chargeSpeed = 4f;
+    private float dashSpeed = 4f;
 
     [SerializeField]
-    private float chargeRange = 5f;
+    private float dashRange = 5f;
 
     [SerializeField]
-    private float chargeThreshold = 0.3f;
+    private float dashThreshold = 0.3f;
 
     [SerializeField]
-    private float chargeRangeMultiplier = 1f;
+    private float dashRangeMultiplier = 1f;
+
+    [Header("Slide Settings")]
+    [SerializeField]
+    private float slideVelocityDecreaseSpeed = 1f;
 
     [SerializeField]
-    private float dashVelocityDecreaseSpeed = 1f;
+    private float slideEndVelocity = 0.5f;
+
+    [Header("Shooting Settings")]
+    [SerializeField]
+    private float shootingCooldown = 0.2f;
 
     [SerializeField]
-    private float dashEndVelocity = 0.5f;
+    private float bulletSpreadRange = 5f;
     #endregion
 
-    // Charge Vectors
+    // Dash Vectors
     #region
-    private Vector2 chargeDestination = Vector2.zero;
-    private Vector2 chargeDirection = Vector2.zero;
-    private Vector2 chargeStartingVelocity = Vector2.zero;
+    private Vector2 dashDestination = Vector2.zero;
+    private Vector2 dashDirection = Vector2.zero;
+    private Vector2 dashStartingVelocity = Vector2.zero;
     #endregion
 
+    private bool canShoot = true;
+
+    [Header("Player State Info")]
     [SerializeField]
     private bool isCharging = false;
 
     [SerializeField]
-    private bool isDashing = false;
+    private bool isSliding = false;
+
+    [SerializeField]
+    private bool isShooting = false;
 
     void Start()
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
+        velocityMeter = GameObject.Find("VelocityMeter").GetComponent<TMP_Text>();
 
         // Assign Observers
         #region
-        chargeButtonClicked += ChargeStarted;
-        dashStart += DashStarted;
-        dashEnd += DashEnded;
+        dashButtonClicked += DashStarted;
+        slideStart += SlideStarted;
+        slideEnd += SlideEnded;
         #endregion
-
-        if (colorIndicators)
-        {
-            spriteRenderer.color = Color.blue;
-        }
     }
 
     void Update()
@@ -101,8 +109,9 @@ public class PlayerController : MonoBehaviour
     {
         currentVelocity = playerRigidbody.velocity.magnitude;
         MovePlayer();
+        HandleSlide();
         HandleDash();
-        HandleCharge();
+        Shoot();
     }
 
     private void UpdateUserInterface()
@@ -134,19 +143,21 @@ public class PlayerController : MonoBehaviour
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
 
+        isShooting = Input.GetButton("Fire1");
+
         if (Input.GetButtonDown("Fire2"))
         {
-            chargeButtonClicked.Invoke();
+            dashButtonClicked.Invoke();
         }
 
         if (Input.GetButtonDown("Jump"))
         {
-            dashStart.Invoke();
+            slideStart.Invoke();
         }
 
         if (Input.GetButtonUp("Jump"))
         {
-            dashEnd.Invoke();
+            slideEnd.Invoke();
         }
 
         moveInput.Normalize();
@@ -154,107 +165,127 @@ public class PlayerController : MonoBehaviour
 
     private void MovePlayer()
     {
-        if (isCharging || isDashing)
+        if (isCharging || isSliding)
         {
             return;
         }
 
         playerRigidbody.velocity = moveInput * runSpeed;
-        //Debug.Log(moveInput * runSpeed);
     }
 
-    private void HandleCharge()
+    private void HandleDash()
     {
         if (!isCharging)
         {
             return;
         }
 
-        if (Vector2.Distance(transform.position, chargeDestination) < chargeThreshold)
+        if (Vector2.Distance(transform.position, dashDestination) < dashThreshold)
         {
-            ChargeEnded();
+            DashEnded();
         }
 
-        playerRigidbody.velocity = chargeStartingVelocity + (chargeDirection * chargeSpeed);
+        playerRigidbody.velocity = dashStartingVelocity + (dashDirection * dashSpeed);
     }
 
-    private void ChargeStarted()
+    private void DashStarted()
     {
         if (isCharging)
         {
             return;
         }
 
-        chargeStartingVelocity =
+        dashStartingVelocity =
             mousePositionRelativeToPlayer.normalized * playerRigidbody.velocity.magnitude;
-        chargeDirection = mousePositionRelativeToPlayer.normalized;
-        chargeDestination =
+        dashDirection = mousePositionRelativeToPlayer.normalized;
+        dashDestination =
             (
-                chargeDirection
-                * (chargeRange + (playerRigidbody.velocity.magnitude * chargeRangeMultiplier))
+                dashDirection
+                * (dashRange + (playerRigidbody.velocity.magnitude * dashRangeMultiplier))
             ) + new Vector2(transform.position.x, transform.position.y);
         isCharging = true;
-        isDashing = false;
-        if (colorIndicators)
-        {
-            spriteRenderer.color = Color.red;
-        }
-    }
-
-    private void ChargeEnded()
-    {
-        chargeDestination = Vector2.zero;
-        chargeDirection = Vector2.zero;
-        isCharging = false;
-        if (colorIndicators)
-        {
-            spriteRenderer.color = Color.blue;
-        }
-    }
-
-    private void DashStarted()
-    {
-        isDashing = true;
-        ChargeEnded();
-        if (colorIndicators)
-        {
-            spriteRenderer.color = Color.green;
-        }
+        isSliding = false;
     }
 
     private void DashEnded()
     {
-        playerRigidbody.velocity = Vector2.zero;
-        isDashing = false;
-        if (colorIndicators)
-        {
-            spriteRenderer.color = Color.blue;
-        }
+        dashDestination = Vector2.zero;
+        dashDirection = Vector2.zero;
+        isCharging = false;
     }
 
-    private void HandleDash()
+    private void HandleSlide()
     {
-        if (!isDashing)
+        if (!isSliding)
         {
             return;
         }
 
         playerRigidbody.velocity = new Vector2(
-            Mathf.Lerp(playerRigidbody.velocity.x, 0, Time.deltaTime * dashVelocityDecreaseSpeed),
-            Mathf.Lerp(playerRigidbody.velocity.y, 0, Time.deltaTime * dashVelocityDecreaseSpeed)
+            Mathf.Lerp(playerRigidbody.velocity.x, 0, Time.deltaTime * slideVelocityDecreaseSpeed),
+            Mathf.Lerp(playerRigidbody.velocity.y, 0, Time.deltaTime * slideVelocityDecreaseSpeed)
         );
 
-        if (currentVelocity < dashEndVelocity)
+        if (currentVelocity < slideEndVelocity)
         {
-            DashEnded();
+            SlideEnded();
         }
+    }
+
+    private void SlideStarted()
+    {
+        isSliding = true;
+        DashEnded();
+    }
+
+    private void SlideEnded()
+    {
+        playerRigidbody.velocity = Vector2.zero;
+        isSliding = false;
+    }
+
+    private void Shoot()
+    {
+        if (!isShooting || !canShoot)
+        {
+            return;
+        }
+
+        GameObject bullet = Instantiate(bulletPrefab);
+
+        bullet.transform.position = transform.position;
+        bullet.transform.right = mousePositionRelativeToPlayer;
+
+        Debug.Log(bullet.transform.eulerAngles.z);
+
+        bullet.transform.eulerAngles = new Vector3(
+            0,
+            0,
+            bullet.transform.eulerAngles.z + CalculateBulletDirection()
+        );
+
+        bullet.GetComponent<Projectile>().StartBullet();
+
+        StartCoroutine(ShootingCooldown());
+    }
+
+    private float CalculateBulletDirection()
+    {
+        return UnityEngine.Random.Range(-bulletSpreadRange, bulletSpreadRange);
+    }
+
+    private IEnumerator ShootingCooldown()
+    {
+        canShoot = false;
+        yield return new WaitForSeconds(shootingCooldown);
+        canShoot = true;
     }
 
     private void DrawDebugLines()
     {
-        if (chargeDestination != Vector2.zero)
+        if (dashDestination != Vector2.zero)
         {
-            Debug.DrawLine(transform.position, chargeDestination, Color.red);
+            Debug.DrawLine(transform.position, dashDestination, Color.red);
         }
     }
 }

@@ -658,7 +658,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 1
+  m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -724,7 +724,7 @@ GameObject:
   - component: {fileID: 1400207923}
   - component: {fileID: 1400207922}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: VelocityMeter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -746,7 +746,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.000061035156, y: -50}
+  m_AnchoredPosition: {x: 0, y: -30}
   m_SizeDelta: {x: -400, y: 50}
   m_Pivot: {x: 0.5000001, y: 0.5000003}
 --- !u!114 &1400207922
@@ -1129,11 +1129,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce6041944b7f2a745802c4651d822a58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentVelocity: 0
-  maxVelocity: 0
+  colorIndicators: 0
+  velocityMeter: {fileID: 1400207922}
+  spriteRenderer: {fileID: 1781571894}
   runSpeed: 5
-  chargeSpeed: 10
+  chargeSpeed: 4
   chargeRange: 5
+  chargeThreshold: 0.3
+  chargeRangeMultiplier: 0
+  dashVelocityDecreaseSpeed: 2
+  dashEndVelocity: 0.5
+  isCharging: 0
+  isDashing: 0
 --- !u!212 &1781571894
 SpriteRenderer:
   m_ObjectHideFlags: 0
