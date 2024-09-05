@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Slide : MovementExtension
 {
-    // Editor Settings
+    // Settings
     #region
     [Header("Settings")]
     [SerializeField]

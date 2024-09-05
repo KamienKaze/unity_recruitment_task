@@ -3,7 +3,7 @@ using Vector2 = UnityEngine.Vector2;
 
 public class Dash : MovementExtension
 {
-    // Editor Settings
+    // Settings
     #region
     [Header("Settings")]
     [SerializeField]
@@ -29,7 +29,7 @@ public class Dash : MovementExtension
     void Start()
     {
         playerMovementManager.dashStart += DashStarted;
-        playerMovementManager.colliderHit += DashEnded;
+        playerMovementManager.wallHit += DashEnded;
     }
 
     private void FixedUpdate()
@@ -39,12 +39,12 @@ public class Dash : MovementExtension
 
     private void DashStarted()
     {
-        if (playerMovementManager.currentPlayerState == PlayerState.Stunned)
+        if (playerMovementManager.currentPlayerState == PlayerState.Dashing)
         {
             return;
         }
 
-        if (playerMovementManager.currentPlayerState == PlayerState.Dashing)
+        if (playerMovementManager.currentPlayerState == PlayerState.Stunned)
         {
             return;
         }
@@ -63,6 +63,12 @@ public class Dash : MovementExtension
     {
         dashDestination = Vector2.zero;
         dashDirection = Vector2.zero;
+
+        if (playerMovementManager.currentPlayerState == PlayerState.Stunned)
+        {
+            return;
+        }
+
         playerMovementManager.currentPlayerState = PlayerState.Basic;
     }
 

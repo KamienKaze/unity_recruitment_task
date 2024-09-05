@@ -16,6 +16,8 @@ public class PlayerMovementManager : MonoBehaviour
     public PlayerState currentPlayerState = PlayerState.Basic;
     private Rigidbody2D playerRigidbody;
 
+    // Settings
+    #region
     [Header("Settings")]
     [SerializeField]
     private float maxVelocityMagnitude = 20f;
@@ -28,14 +30,18 @@ public class PlayerMovementManager : MonoBehaviour
 
     [SerializeField]
     private float stunLength = 2f;
+    #endregion
 
     private Vector2 cursorDirection;
     private Vector2 moveInput;
 
+    // Actions
+    #region
     public Action dashStart;
+    public Action wallHit;
     public Action slideStart;
     public Action slideEnd;
-    public Action colliderHit;
+    #endregion
 
     public bool isShooting;
 
@@ -53,6 +59,7 @@ public class PlayerMovementManager : MonoBehaviour
     private void FixedUpdate()
     {
         MovePlayer();
+        CheckForStun();
     }
 
     private void GetInput()
@@ -85,6 +92,8 @@ public class PlayerMovementManager : MonoBehaviour
         }
     }
 
+    // Player Management
+    #region
     private void RotatePlayer()
     {
         if (currentPlayerState == PlayerState.Stunned)
@@ -107,7 +116,30 @@ public class PlayerMovementManager : MonoBehaviour
             return;
         }
 
-        playerRigidbody.velocity = moveInput * runSpeed;
+        playerRigidbody.velocity = moveInput.normalized * runSpeed;
+    }
+
+    private void CheckForStun()
+    {
+        if (GetCurrentVelocity().magnitude < minStunVelocity)
+        {
+            return;
+        }
+
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(
+            transform.position,
+            GetComponent<CircleCollider2D>().radius,
+            GetCurrentVelocity(),
+            0.1f
+        );
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (hit.collider.tag == "Wall")
+            {
+                ApplyStun();
+            }
+        }
     }
 
     private void ApplyStun()
@@ -122,7 +154,10 @@ public class PlayerMovementManager : MonoBehaviour
         yield return new WaitForSeconds(stunLength);
         currentPlayerState = PlayerState.Basic;
     }
+    #endregion
 
+    // Get Methods
+    #region
     public Vector2 GetCurrentPosition()
     {
         return transform.position;
@@ -138,6 +173,19 @@ public class PlayerMovementManager : MonoBehaviour
         return cursorDirection;
     }
 
+    public float GetMaxVelocity()
+    {
+        return maxVelocityMagnitude;
+    }
+
+    public float GetMinStunVelocity()
+    {
+        return minStunVelocity;
+    }
+    #endregion
+
+    // Set Methods
+    #region
     public void SetPlayerVelocity(Vector2 newVelocity)
     {
         if (newVelocity.magnitude > maxVelocityMagnitude)
@@ -148,17 +196,11 @@ public class PlayerMovementManager : MonoBehaviour
 
         playerRigidbody.velocity = newVelocity;
     }
+    #endregion
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D collision2D)
     {
-        if (GetCurrentVelocity().magnitude >= minStunVelocity)
-        {
-            ApplyStun();
-        }
-        else
-        {
-            colliderHit.Invoke();
-            SetPlayerVelocity(Vector2.zero);
-        }
+        SetPlayerVelocity(Vector2.zero);
+        wallHit.Invoke();
     }
 }
