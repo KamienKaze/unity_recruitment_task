@@ -16,7 +16,10 @@ public class Projectile : MonoBehaviour
         projectileStartingPosition = transform.position;
     }
 
-    private void Update() { }
+    private void FixedUpdate()
+    {
+        ControlBulletDistance();
+    }
 
     public void SetProjectileSpeed(float projectileSpeed)
     {
@@ -38,6 +41,16 @@ public class Projectile : MonoBehaviour
         gameObject.GetComponent<SpriteRenderer>().sprite = sprite;
     }
 
+    private void ControlBulletDistance()
+    {
+        if (
+            Vector2.Distance(projectileStartingPosition, transform.position) > maxProjectileDistance
+        )
+        {
+            Destroy(gameObject);
+        }
+    }
+
     public void StartProjectile()
     {
         projectileRigidbody.velocity = transform.right * projectileSpeed;
@@ -48,5 +61,13 @@ public class Projectile : MonoBehaviour
         projectileRigidbody.velocity = Vector2.zero;
     }
 
-    private void OnTriggerEnter2D(Collider2D collider) { }
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        if (collider.tag == "Player")
+        {
+            return;
+        }
+
+        Destroy(gameObject);
+    }
 }

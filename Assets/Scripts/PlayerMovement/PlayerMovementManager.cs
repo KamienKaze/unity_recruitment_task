@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 
@@ -7,6 +8,7 @@ public enum PlayerState
     Basic,
     Dashing,
     Sliding,
+    Stunned,
 }
 
 public class PlayerMovementManager : MonoBehaviour
@@ -21,12 +23,19 @@ public class PlayerMovementManager : MonoBehaviour
     [SerializeField]
     private float runSpeed = 5f;
 
+    [SerializeField]
+    private float minStunVelocity = 10f;
+
+    [SerializeField]
+    private float stunLength = 2f;
+
     private Vector2 cursorDirection;
     private Vector2 moveInput;
 
     public Action dashStart;
     public Action slideStart;
     public Action slideEnd;
+    public Action colliderHit;
 
     public bool isShooting;
 
@@ -78,6 +87,11 @@ public class PlayerMovementManager : MonoBehaviour
 
     private void RotatePlayer()
     {
+        if (currentPlayerState == PlayerState.Stunned)
+        {
+            return;
+        }
+
         transform.up = cursorDirection;
     }
 
@@ -88,7 +102,25 @@ public class PlayerMovementManager : MonoBehaviour
             return;
         }
 
+        if (currentPlayerState == PlayerState.Stunned)
+        {
+            return;
+        }
+
         playerRigidbody.velocity = moveInput * runSpeed;
+    }
+
+    private void ApplyStun()
+    {
+        currentPlayerState = PlayerState.Stunned;
+        playerRigidbody.velocity = Vector2.zero;
+        StartCoroutine(StunTimer());
+    }
+
+    private IEnumerator StunTimer()
+    {
+        yield return new WaitForSeconds(stunLength);
+        currentPlayerState = PlayerState.Basic;
     }
 
     public Vector2 GetCurrentPosition()
@@ -115,5 +147,18 @@ public class PlayerMovementManager : MonoBehaviour
         }
 
         playerRigidbody.velocity = newVelocity;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (GetCurrentVelocity().magnitude >= minStunVelocity)
+        {
+            ApplyStun();
+        }
+        else
+        {
+            colliderHit.Invoke();
+            SetPlayerVelocity(Vector2.zero);
+        }
     }
 }

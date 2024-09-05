@@ -29,6 +29,7 @@ public class Dash : MovementExtension
     void Start()
     {
         playerMovementManager.dashStart += DashStarted;
+        playerMovementManager.colliderHit += DashEnded;
     }
 
     private void FixedUpdate()
@@ -38,6 +39,11 @@ public class Dash : MovementExtension
 
     private void DashStarted()
     {
+        if (playerMovementManager.currentPlayerState == PlayerState.Stunned)
+        {
+            return;
+        }
+
         if (playerMovementManager.currentPlayerState == PlayerState.Dashing)
         {
             return;

@@ -25,6 +25,11 @@ public class Slide : MovementExtension
 
     private void SlideStarted()
     {
+        if (playerMovementManager.currentPlayerState == PlayerState.Stunned)
+        {
+            return;
+        }
+
         playerMovementManager.currentPlayerState = PlayerState.Sliding;
     }
 
