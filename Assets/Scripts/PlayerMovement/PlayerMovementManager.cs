@@ -28,6 +28,8 @@ public class PlayerMovementManager : MonoBehaviour
     public Action slideStart;
     public Action slideEnd;
 
+    public bool isShooting;
+
     private void Start()
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
@@ -56,6 +58,7 @@ public class PlayerMovementManager : MonoBehaviour
 
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
+        isShooting = Input.GetButton("Fire1");
 
         if (Input.GetButtonDown("Fire2"))
         {

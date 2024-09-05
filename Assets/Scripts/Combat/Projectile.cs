@@ -1,39 +1,52 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
     [SerializeField]
-    private Rigidbody2D bulletRigidbody;
+    private Rigidbody2D projectileRigidbody;
 
-    [SerializeField]
     private float projectileSpeed;
-
-    [SerializeField]
+    private float projectileDamage;
     private float maxProjectileDistance;
 
-    private Vector2 startingPosition;
+    private Vector2 projectileStartingPosition;
 
     private void Start()
     {
-        startingPosition = transform.position;
+        projectileStartingPosition = transform.position;
     }
 
-    private void Update()
+    private void Update() { }
+
+    public void SetProjectileSpeed(float projectileSpeed)
     {
-        if (Vector2.Distance(startingPosition, transform.position) > maxProjectileDistance)
-        {
-            Destroy(gameObject);
-        }
+        this.projectileSpeed = projectileSpeed;
     }
 
-    public void StartBullet()
+    public void SetProjectileDamage(float projectileDamage)
     {
-        bulletRigidbody.velocity = transform.right * projectileSpeed;
+        this.projectileDamage = projectileDamage;
     }
 
-    public void StopBullet()
+    public void SetMaxProjectileDistance(float maxProjectileDistance)
     {
-        bulletRigidbody.velocity = Vector2.zero;
+        this.maxProjectileDistance = maxProjectileDistance;
     }
+
+    public void SetProjectileSprite(Sprite sprite)
+    {
+        gameObject.GetComponent<SpriteRenderer>().sprite = sprite;
+    }
+
+    public void StartProjectile()
+    {
+        projectileRigidbody.velocity = transform.right * projectileSpeed;
+    }
+
+    public void StopProjectile()
+    {
+        projectileRigidbody.velocity = Vector2.zero;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider) { }
 }

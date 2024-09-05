@@ -28,7 +28,7 @@ public class Dash : MovementExtension
 
     void Start()
     {
-        playerController.dashStart += DashStarted;
+        playerMovementManager.dashStart += DashStarted;
     }
 
     private void FixedUpdate()
@@ -38,7 +38,7 @@ public class Dash : MovementExtension
 
     private void DashStarted()
     {
-        if (playerController.currentPlayerState == PlayerState.Dashing)
+        if (playerMovementManager.currentPlayerState == PlayerState.Dashing)
         {
             return;
         }
@@ -50,19 +50,19 @@ public class Dash : MovementExtension
             + currentPlayerPosition
         );
 
-        playerController.currentPlayerState = PlayerState.Dashing;
+        playerMovementManager.currentPlayerState = PlayerState.Dashing;
     }
 
     private void DashEnded()
     {
         dashDestination = Vector2.zero;
         dashDirection = Vector2.zero;
-        playerController.currentPlayerState = PlayerState.Basic;
+        playerMovementManager.currentPlayerState = PlayerState.Basic;
     }
 
     private void HandleDash()
     {
-        if (playerController.currentPlayerState != PlayerState.Dashing)
+        if (playerMovementManager.currentPlayerState != PlayerState.Dashing)
         {
             return;
         }
@@ -72,6 +72,6 @@ public class Dash : MovementExtension
             DashEnded();
         }
 
-        playerController.SetPlayerVelocity(dashStartingVelocity + (dashDirection * dashSpeed));
+        playerMovementManager.SetPlayerVelocity(dashStartingVelocity + (dashDirection * dashSpeed));
     }
 }

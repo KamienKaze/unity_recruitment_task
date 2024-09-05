@@ -14,8 +14,8 @@ public class Slide : MovementExtension
 
     void Start()
     {
-        playerController.slideStart += SlideStarted;
-        playerController.slideEnd += SlideEnded;
+        playerMovementManager.slideStart += SlideStarted;
+        playerMovementManager.slideEnd += SlideEnded;
     }
 
     private void FixedUpdate()
@@ -25,28 +25,28 @@ public class Slide : MovementExtension
 
     private void SlideStarted()
     {
-        playerController.currentPlayerState = PlayerState.Sliding;
+        playerMovementManager.currentPlayerState = PlayerState.Sliding;
     }
 
     private void SlideEnded()
     {
-        if (playerController.currentPlayerState != PlayerState.Sliding)
+        if (playerMovementManager.currentPlayerState != PlayerState.Sliding)
         {
             return;
         }
 
-        playerController.SetPlayerVelocity(Vector2.zero);
-        playerController.currentPlayerState = PlayerState.Basic;
+        playerMovementManager.SetPlayerVelocity(Vector2.zero);
+        playerMovementManager.currentPlayerState = PlayerState.Basic;
     }
 
     private void HandleSlide()
     {
-        if (playerController.currentPlayerState != PlayerState.Sliding)
+        if (playerMovementManager.currentPlayerState != PlayerState.Sliding)
         {
             return;
         }
 
-        playerController.SetPlayerVelocity(
+        playerMovementManager.SetPlayerVelocity(
             new Vector2(
                 Mathf.Lerp(currentPlayerVelocity.x, 0, Time.deltaTime * slideVelocityDecreaseSpeed),
                 Mathf.Lerp(currentPlayerVelocity.y, 0, Time.deltaTime * slideVelocityDecreaseSpeed)
