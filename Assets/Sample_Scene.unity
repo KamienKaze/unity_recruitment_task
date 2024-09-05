@@ -1109,7 +1109,9 @@ GameObject:
   - component: {fileID: 1781571895}
   - component: {fileID: 1781571894}
   - component: {fileID: 1781571896}
-  - component: {fileID: 1781571893}
+  - component: {fileID: 1781571899}
+  - component: {fileID: 1781571898}
+  - component: {fileID: 1781571897}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1117,30 +1119,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1781571893
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1781571892}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce6041944b7f2a745802c4651d822a58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  colorIndicators: 0
-  velocityMeter: {fileID: 1400207922}
-  spriteRenderer: {fileID: 1781571894}
-  runSpeed: 5
-  chargeSpeed: 4
-  chargeRange: 5
-  chargeThreshold: 0.3
-  chargeRangeMultiplier: 0
-  dashVelocityDecreaseSpeed: 2
-  dashEndVelocity: 0.5
-  isCharging: 0
-  isDashing: 0
 --- !u!212 &1781571894
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1235,6 +1213,51 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &1781571897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1781571892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d06eb8da94155bf41bc0b3a6aa76ce28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slideVelocityDecreaseSpeed: 1
+  slideEndVelocity: 0.5
+--- !u!114 &1781571898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1781571892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d7f5f08487c26f4284c6663bdd6e696, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dashSpeed: 4
+  dashRange: 5
+  dashEndThreshold: 0.3
+  dashRangeMultiplier: 1
+--- !u!114 &1781571899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1781571892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 139a0891e28013c4091c39489e666ce1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentPlayerState: 0
+  maxVelocityMagnitude: 20
+  runSpeed: 5
 --- !u!1 &1857023036
 GameObject:
   m_ObjectHideFlags: 0
