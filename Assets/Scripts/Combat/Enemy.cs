@@ -19,7 +19,6 @@ public class Enemy : MonoBehaviour
     private void Update()
     {
         CheckForDeath();
-        Debug.Log(enemyHealth);
     }
 
     private void FixedUpdate()
