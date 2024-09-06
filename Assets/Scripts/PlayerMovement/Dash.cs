@@ -3,8 +3,7 @@ using Vector2 = UnityEngine.Vector2;
 
 public class Dash : MovementExtension
 {
-    // Settings
-    #region
+    #region Settings
     [Header("Settings")]
     [SerializeField]
     private float dashSpeed = 4f;
@@ -17,10 +16,21 @@ public class Dash : MovementExtension
 
     [SerializeField]
     private float dashRangeMultiplier = 1f;
+
+    [SerializeField]
+    private int maxDashCharges = 4;
+
+    [SerializeField]
+    private int dashChargesAfterKill = 2;
+
+    [SerializeField]
+    private float lastDashCooldown = 3f;
+
     #endregion
 
-    // Vectors
-    #region
+    public int currentDashCharges;
+
+    #region Vectors
     private Vector2 dashDestination = Vector2.zero;
     private Vector2 dashDirection = Vector2.zero;
     private Vector2 dashStartingVelocity = Vector2.zero;
@@ -28,8 +38,34 @@ public class Dash : MovementExtension
 
     void Start()
     {
+        currentDashCharges = maxDashCharges;
+
         playerMovementManager.dashStart += DashStarted;
         playerMovementManager.wallHit += DashEnded;
+        playerMovementManager.enemyHit += EnemyHit;
+    }
+
+    private void EnemyHit(GameObject enemy)
+    {
+        if (playerMovementManager.currentPlayerState != PlayerState.Dashing)
+        {
+            return;
+        }
+
+        AddDashCharges(dashChargesAfterKill);
+        Destroy(enemy);
+    }
+
+    private void AddDashCharges(int charges)
+    {
+        if (currentDashCharges + charges > maxDashCharges)
+        {
+            currentDashCharges = maxDashCharges;
+        }
+        else
+        {
+            currentDashCharges += charges;
+        }
     }
 
     private void FixedUpdate()
@@ -39,7 +75,10 @@ public class Dash : MovementExtension
 
     private void DashStarted()
     {
-        if (playerMovementManager.currentPlayerState == PlayerState.Dashing)
+        if (
+            playerMovementManager.currentPlayerState == PlayerState.Dashing
+            || currentDashCharges <= 0
+        )
         {
             return;
         }
@@ -49,6 +88,7 @@ public class Dash : MovementExtension
             return;
         }
 
+        currentDashCharges--;
         dashStartingVelocity = currentCursorDirection * currentPlayerVelocity.magnitude;
         dashDirection = currentCursorDirection;
         dashDestination = (

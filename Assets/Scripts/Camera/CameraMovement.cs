@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
@@ -23,6 +24,11 @@ public class CameraMovement : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (target.IsDestroyed())
+        {
+            return;
+        }
+
         Vector3 targetPosition = target.position + _offset;
         transform.position = Vector3.SmoothDamp(
             transform.position,

@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class Slide : MovementExtension
 {
-    // Settings
-    #region
+    #region Settings
     [Header("Settings")]
     [SerializeField]
     private float slideVelocityDecreaseSpeed = 1f;
@@ -16,6 +15,16 @@ public class Slide : MovementExtension
     {
         playerMovementManager.slideStart += SlideStarted;
         playerMovementManager.slideEnd += SlideEnded;
+        playerMovementManager.enemyHit += EnemyHit;
+    }
+
+    private void EnemyHit(GameObject enemy)
+    {
+        if (playerMovementManager.currentPlayerState != PlayerState.Sliding)
+        {
+            return;
+        }
+        playerMovementManager.UpdatePlayerHealth(-1);
     }
 
     private void FixedUpdate()

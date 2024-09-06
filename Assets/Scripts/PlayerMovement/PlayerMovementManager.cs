@@ -16,10 +16,11 @@ public class PlayerMovementManager : MonoBehaviour
     public PlayerState currentPlayerState = PlayerState.Basic;
     private Rigidbody2D playerRigidbody;
 
-    // Settings
-    #region
+    #region Settings
     [Header("Settings")]
     [SerializeField]
+    private int playerHealth = 5;
+
     private float maxVelocityMagnitude = 20f;
 
     [SerializeField]
@@ -35,10 +36,10 @@ public class PlayerMovementManager : MonoBehaviour
     private Vector2 cursorDirection;
     private Vector2 moveInput;
 
-    // Actions
-    #region
+    #region Actions
     public Action dashStart;
     public Action wallHit;
+    public Action<GameObject> enemyHit;
     public Action slideStart;
     public Action slideEnd;
     #endregion
@@ -54,6 +55,7 @@ public class PlayerMovementManager : MonoBehaviour
     {
         GetInput();
         RotatePlayer();
+        CheckForDeath();
     }
 
     private void FixedUpdate()
@@ -92,8 +94,7 @@ public class PlayerMovementManager : MonoBehaviour
         }
     }
 
-    // Player Management
-    #region
+    #region Player Management
     private void RotatePlayer()
     {
         if (currentPlayerState == PlayerState.Stunned)
@@ -142,6 +143,14 @@ public class PlayerMovementManager : MonoBehaviour
         }
     }
 
+    private void CheckForDeath()
+    {
+        if (playerHealth <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void ApplyStun()
     {
         currentPlayerState = PlayerState.Stunned;
@@ -156,8 +165,7 @@ public class PlayerMovementManager : MonoBehaviour
     }
     #endregion
 
-    // Get Methods
-    #region
+    #region Get Methods
     public Vector2 GetCurrentPosition()
     {
         return transform.position;
@@ -182,10 +190,14 @@ public class PlayerMovementManager : MonoBehaviour
     {
         return minStunVelocity;
     }
+
+    public int GetPlayerHealth()
+    {
+        return playerHealth;
+    }
     #endregion
 
-    // Set Methods
-    #region
+    #region Set Methods
     public void SetPlayerVelocity(Vector2 newVelocity)
     {
         if (newVelocity.magnitude > maxVelocityMagnitude)
@@ -196,11 +208,31 @@ public class PlayerMovementManager : MonoBehaviour
 
         playerRigidbody.velocity = newVelocity;
     }
+
+    public void UpdatePlayerHealth(int health)
+    {
+        playerHealth += health;
+    }
     #endregion
 
     private void OnCollisionEnter2D(Collision2D collision2D)
     {
         SetPlayerVelocity(Vector2.zero);
         wallHit.Invoke();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider2D)
+    {
+        if (collider2D.tag != "Enemy")
+        {
+            return;
+        }
+
+        enemyHit.Invoke(collider2D.gameObject);
+
+        if (currentPlayerState == PlayerState.Basic || currentPlayerState == PlayerState.Stunned)
+        {
+            UpdatePlayerHealth(-1);
+        }
     }
 }
