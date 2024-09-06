@@ -36,6 +36,6 @@ public class UserInterface : MonoBehaviour
             "Velocity: "
             + Math.Round(playerMovementManager.GetCurrentVelocity().magnitude * 100) / 100;
         healthBar.text = "Health: " + playerMovementManager.GetPlayerHealth();
-        dashBar.text = "Dash: " + dash.currentDashCharges;
+        dashBar.text = "Dash: " + dash.GetCurrentDashCharges();
     }
 }

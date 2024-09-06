@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 
@@ -24,11 +25,14 @@ public class Dash : MovementExtension
     private int dashChargesAfterKill = 2;
 
     [SerializeField]
-    private float lastDashCooldown = 3f;
+    private float dashDamageMultiplier = 0.5f;
+
+    [SerializeField]
+    private float dashCooldown = 5f;
 
     #endregion
 
-    public int currentDashCharges;
+    private int currentDashCharges;
 
     #region Vectors
     private Vector2 dashDestination = Vector2.zero;
@@ -42,21 +46,11 @@ public class Dash : MovementExtension
 
         playerMovementManager.dashStart += DashStarted;
         playerMovementManager.wallHit += DashEnded;
-        playerMovementManager.enemyHit += EnemyHit;
+
+        StartCoroutine(DashCooldown());
     }
 
-    private void EnemyHit(GameObject enemy)
-    {
-        if (playerMovementManager.currentPlayerState != PlayerState.Dashing)
-        {
-            return;
-        }
-
-        AddDashCharges(dashChargesAfterKill);
-        Destroy(enemy);
-    }
-
-    private void AddDashCharges(int charges)
+    public void AddDashCharges(int charges)
     {
         if (currentDashCharges + charges > maxDashCharges)
         {
@@ -66,6 +60,21 @@ public class Dash : MovementExtension
         {
             currentDashCharges += charges;
         }
+    }
+
+    public int GetDashChargesAfterKill()
+    {
+        return dashChargesAfterKill;
+    }
+
+    public float GetDashDamageMultiplier()
+    {
+        return dashDamageMultiplier;
+    }
+
+    public int GetCurrentDashCharges()
+    {
+        return currentDashCharges;
     }
 
     private void FixedUpdate()
@@ -125,5 +134,13 @@ public class Dash : MovementExtension
         }
 
         playerMovementManager.SetPlayerVelocity(dashStartingVelocity + (dashDirection * dashSpeed));
+    }
+
+    private IEnumerator DashCooldown()
+    {
+        yield return new WaitForSeconds(dashCooldown);
+        AddDashCharges(1);
+
+        StartCoroutine(DashCooldown());
     }
 }

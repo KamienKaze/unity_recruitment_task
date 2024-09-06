@@ -39,7 +39,6 @@ public class PlayerMovementManager : MonoBehaviour
     #region Actions
     public Action dashStart;
     public Action wallHit;
-    public Action<GameObject> enemyHit;
     public Action slideStart;
     public Action slideEnd;
     #endregion
@@ -136,7 +135,7 @@ public class PlayerMovementManager : MonoBehaviour
 
         foreach (RaycastHit2D hit in hits)
         {
-            if (hit.collider.tag == "Wall")
+            if (hit.collider.CompareTag("Wall"))
             {
                 ApplyStun();
             }
@@ -219,20 +218,5 @@ public class PlayerMovementManager : MonoBehaviour
     {
         SetPlayerVelocity(Vector2.zero);
         wallHit.Invoke();
-    }
-
-    private void OnTriggerEnter2D(Collider2D collider2D)
-    {
-        if (collider2D.tag != "Enemy")
-        {
-            return;
-        }
-
-        enemyHit.Invoke(collider2D.gameObject);
-
-        if (currentPlayerState == PlayerState.Basic || currentPlayerState == PlayerState.Stunned)
-        {
-            UpdatePlayerHealth(-1);
-        }
     }
 }

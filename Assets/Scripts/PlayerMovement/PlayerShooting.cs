@@ -21,7 +21,7 @@ public class PlayerShooting : MovementExtension
     private float shootingCooldown = 0.2f;
 
     [SerializeField]
-    private float bulletDamage = 1f;
+    private int bulletDamage = 1;
 
     [SerializeField]
     private float maxBulletDistance = 30f;

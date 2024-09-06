@@ -6,7 +6,7 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D projectileRigidbody;
 
     private float projectileSpeed;
-    private float projectileDamage;
+    private int projectileDamage;
     private float maxProjectileDistance;
 
     private Vector2 projectileStartingPosition;
@@ -26,7 +26,7 @@ public class Projectile : MonoBehaviour
         this.projectileSpeed = projectileSpeed;
     }
 
-    public void SetProjectileDamage(float projectileDamage)
+    public void SetProjectileDamage(int projectileDamage)
     {
         this.projectileDamage = projectileDamage;
     }
@@ -63,9 +63,14 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
-        if (collider.tag == "Player")
+        if (collider.CompareTag("Player"))
         {
             return;
+        }
+
+        if (collider.CompareTag("Enemy"))
+        {
+            collider.GetComponent<Enemy>().RecieveDamage(projectileDamage);
         }
 
         Destroy(gameObject);
