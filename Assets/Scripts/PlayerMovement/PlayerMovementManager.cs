@@ -31,6 +31,9 @@ public class PlayerMovementManager : MonoBehaviour
 
     [SerializeField]
     private float stunLength = 2f;
+
+    [SerializeField]
+    private float immunitySeconds = 1f;
     #endregion
 
     private Vector2 cursorDirection;

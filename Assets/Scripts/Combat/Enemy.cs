@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -16,6 +17,8 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private float moveSpeed = 3f;
 
+    private bool isTouchingPlayer = false;
+
     private void Update()
     {
         CheckForDeath();
@@ -29,6 +32,11 @@ public class Enemy : MonoBehaviour
     private void MoveEnemy()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player == null)
+        {
+            return;
+        }
 
         Vector2 moveVelocity = player.transform.position - transform.position;
         enemyRigidbody.velocity = moveVelocity.normalized * moveSpeed;

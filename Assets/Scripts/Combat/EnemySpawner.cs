@@ -25,7 +25,14 @@ public class EnemySpawner : MonoBehaviour
         float randomX = Random.Range(spawnerDimensions.x, -spawnerDimensions.x);
         float randomY = Random.Range(spawnerDimensions.y, -spawnerDimensions.y);
 
-        Vector2 playerPosition = GameObject.FindGameObjectWithTag("Player").transform.position;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player == null)
+        {
+            return;
+        }
+
+        Vector2 playerPosition = player.transform.position;
 
         if (Vector2.Distance(playerPosition, new Vector2(randomX, randomY)) < minDistanceFromPlayer)
         {
