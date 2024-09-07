@@ -43,6 +43,11 @@ public class PlayerShooting : MovementExtension
             return;
         }
 
+        if (playerMovementManager.currentPlayerState == PlayerState.Stunned)
+        {
+            return;
+        }
+
         GameObject bullet = Instantiate(bulletPrefab);
 
         bullet.transform.position = currentPlayerPosition;
